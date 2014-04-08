@@ -1,6 +1,3 @@
-// message data
-var msgString = "<message><from>ground control</from><body>you've really made the grade</body></message>";
-
 // Load the http module to create an http server.
 // Load the websocket module to listen for websocket connections
 var http = require('http'),
@@ -45,7 +42,7 @@ var connectNewClient = function(connection){
   });
   
   // send a message back
-  clients[id].sendUTF(msgString);
+  clients[id].sendUTF('<message><from>Server</from><body>connected with id: '+id+'</body></message>');
 };
 
 var closeConnection = function(id, connection, reasonCode, description){
@@ -54,5 +51,13 @@ var closeConnection = function(id, connection, reasonCode, description){
 };
 
 var sendMessage = function(id, message){
-  console.log(message);
+  // The string message that was sent to us
+  var msgString = message.utf8Data;
+  console.log(msgString);
+  
+  for(var i in clients){
+    if(id.toString() !== i){
+      clients[i].sendUTF(msgString);
+    }
+  }
 };

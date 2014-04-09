@@ -41,11 +41,33 @@ var connectNewClient = function(connection){
     closeConnection(id, connection, reasonCode, description);
   });
   
-  // send a message back
+  // tell everyone there is a new connection
+  for(var i in clients){
+    if(id.toString() !== i){
+      clients[i].sendUTF('<presence><user name="user_'+id+'" status="join" /></presence>');
+    }
+  }
+  
+  // send a message back to say connected
   clients[id].sendUTF('<message><from>Server</from><body>connected with id: '+id+'</body></message>');
+  // tell the new connection whos online
+  var presence = '';
+  for(var i in clients){
+    if(id.toString() !== i){
+      presence += '<user name="user_'+i+'" status="join" />';
+    }
+  }
+  clients[id].sendUTF('<presence>'+presence+'</presence>');
 };
 
 var closeConnection = function(id, connection, reasonCode, description){
+  // tell everyone someone has left
+  for(var i in clients){
+    if(id.toString() !== i){
+      clients[i].sendUTF('<presence><user name="user_'+id+'" status="leave" /></presence>');
+    }
+  }
+  
   delete clients[id];
   console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
 };
